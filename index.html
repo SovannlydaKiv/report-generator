@@ -11,10 +11,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- highlight.js for syntax highlighting -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
-
     <!-- jsPDF (primary: jsdelivr, fallback: unpkg) -->
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script>
@@ -60,21 +56,16 @@
             <div class="step-line"></div>
             <div class="step" data-step="2">
                 <div class="step-number">2</div>
-                <span>Source Code</span>
+                <span>Exercises</span>
             </div>
             <div class="step-line"></div>
             <div class="step" data-step="3">
                 <div class="step-number">3</div>
-                <span>Screenshots</span>
-            </div>
-            <div class="step-line"></div>
-            <div class="step" data-step="4">
-                <div class="step-number">4</div>
                 <span>Generate</span>
             </div>
         </div>
 
-        <!-- Section 1: Metadata -->
+        <!-- Section 1: Metadata + Logo -->
         <section class="card section-card" id="sectionDetails">
             <div class="card-header">
                 <div class="card-icon">
@@ -85,6 +76,29 @@
                 </div>
                 <h2>Report Details</h2>
             </div>
+
+            <!-- Logo upload -->
+            <div class="logo-upload-section">
+                <label class="form-label-standalone">School Logo</label>
+                <div class="logo-upload-zone" id="logoUploadZone">
+                    <div class="logo-upload-content" id="logoUploadContent">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <span>Upload school logo</span>
+                    </div>
+                    <img id="logoPreview" class="logo-preview" style="display:none" alt="School logo preview">
+                    <button id="logoRemoveBtn" class="logo-remove-btn" style="display:none" title="Remove logo">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" hidden>
+            </div>
+
             <div class="form-grid">
                 <div class="form-group">
                     <label for="reportTitle">Report Title</label>
@@ -113,8 +127,8 @@
             </div>
         </section>
 
-        <!-- Section 2: Source Code Upload -->
-        <section class="card section-card" id="sectionCode">
+        <!-- Section 2: Exercises (Code + Screenshots per file) -->
+        <section class="card section-card" id="sectionExercises">
             <div class="card-header">
                 <div class="card-icon">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -122,8 +136,9 @@
                         <polyline points="8 6 2 12 8 18"/>
                     </svg>
                 </div>
-                <h2>Source Code Files</h2>
+                <h2>Exercises</h2>
             </div>
+            <p class="section-hint">Upload source code files, then add output screenshots for each one.</p>
             <div class="drop-zone" id="codeDropZone">
                 <div class="drop-zone-content">
                     <div class="drop-icon">
@@ -138,45 +153,16 @@
                 </div>
                 <input type="file" id="codeFileInput" multiple accept=".c,.cpp,.h,.hpp,.py,.java,.js,.ts,.html,.css,.txt,.cs,.rb,.go,.rs,.php,.swift,.kt,.scala,.r,.m,.sql,.sh,.bat,.ps1,.yaml,.yml,.json,.xml,.md" hidden>
             </div>
-            <div class="file-list" id="codeFileList"></div>
+            <div id="exerciseList"></div>
         </section>
 
-        <!-- Section 3: Screenshot Upload -->
-        <section class="card section-card" id="sectionScreenshots">
-            <div class="card-header">
-                <div class="card-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21 15 16 10 5 21"/>
-                    </svg>
-                </div>
-                <h2>Output Screenshots</h2>
-            </div>
-            <div class="drop-zone" id="screenshotDropZone">
-                <div class="drop-zone-content">
-                    <div class="drop-icon">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21 15 16 10 5 21"/>
-                        </svg>
-                    </div>
-                    <p class="drop-text">Drag & drop your screenshots here</p>
-                    <p class="drop-subtext">or click to browse — supports PNG, JPG, JPEG, GIF, WEBP</p>
-                </div>
-                <input type="file" id="screenshotFileInput" multiple accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" hidden>
-            </div>
-            <div class="screenshot-grid" id="screenshotGrid"></div>
-        </section>
-
-        <!-- Section 4: Generate -->
+        <!-- Section 3: Generate -->
         <section class="card section-card generate-section" id="sectionGenerate">
             <div class="generate-content">
                 <div class="generate-summary" id="generateSummary">
                     <div class="summary-item">
-                        <span class="summary-label">Code Files</span>
-                        <span class="summary-value" id="summaryCodeCount">0</span>
+                        <span class="summary-label">Exercises</span>
+                        <span class="summary-value" id="summaryExerciseCount">0</span>
                     </div>
                     <div class="summary-item">
                         <span class="summary-label">Screenshots</span>
