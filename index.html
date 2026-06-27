@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Generate beautifully formatted PDF reports from source code and output screenshots.">
+    <title>Report Generator — PDF from Source Code & Screenshots</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated background particles -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- Main container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                </div>
+                <h1>Report Generator</h1>
+            </div>
+            <p class="subtitle">Upload your source code & screenshots, generate a professional PDF report</p>
+        </header>
+
+        <!-- Step indicator -->
+        <div class="steps-indicator">
+            <div class="step active" data-step="1">
+                <div class="step-number">1</div>
+                <span>Details</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" data-step="2">
+                <div class="step-number">2</div>
+                <span>Source Code</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" data-step="3">
+                <div class="step-number">3</div>
+                <span>Screenshots</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step" data-step="4">
+                <div class="step-number">4</div>
+                <span>Generate</span>
+            </div>
+        </div>
+
+        <!-- Section 1: Metadata -->
+        <section class="card section-card" id="sectionDetails">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <h2>Report Details</h2>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="reportTitle">Report Title</label>
+                    <input type="text" id="reportTitle" placeholder="e.g. Data Structures Project Report" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="studentName">Student Name</label>
+                    <input type="text" id="studentName" placeholder="Your full name" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="studentId">Student ID</label>
+                    <input type="text" id="studentId" placeholder="e.g. 2024-CS-001" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="className">Class / Course</label>
+                    <input type="text" id="className" placeholder="e.g. Data Structures & Algorithms" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="teacherName">Teacher's Name</label>
+                    <input type="text" id="teacherName" placeholder="e.g. Prof. John Smith" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="reportDate">Date</label>
+                    <input type="date" id="reportDate">
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Source Code Upload -->
+        <section class="card section-card" id="sectionCode">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 18 22 12 16 6"/>
+                        <polyline points="8 6 2 12 8 18"/>
+                    </svg>
+                </div>
+                <h2>Source Code Files</h2>
+            </div>
+            <div class="drop-zone" id="codeDropZone">
+                <div class="drop-zone-content">
+                    <div class="drop-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <p class="drop-text">Drag & drop your source code files here</p>
+                    <p class="drop-subtext">or click to browse — supports .c, .cpp, .py, .java, .js, .html, .css, .h, .hpp, .txt and more</p>
+                </div>
+                <input type="file" id="codeFileInput" multiple accept=".c,.cpp,.h,.hpp,.py,.java,.js,.ts,.html,.css,.txt,.cs,.rb,.go,.rs,.php,.swift,.kt,.scala,.r,.m,.sql,.sh,.bat,.ps1,.yaml,.yml,.json,.xml,.md" hidden>
+            </div>
+            <div class="file-list" id="codeFileList"></div>
+        </section>
+
+        <!-- Section 3: Screenshot Upload -->
+        <section class="card section-card" id="sectionScreenshots">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                </div>
+                <h2>Output Screenshots</h2>
+            </div>
+            <div class="drop-zone" id="screenshotDropZone">
+                <div class="drop-zone-content">
+                    <div class="drop-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </div>
+                    <p class="drop-text">Drag & drop your screenshots here</p>
+                    <p class="drop-subtext">or click to browse — supports PNG, JPG, JPEG, GIF, WEBP</p>
+                </div>
+                <input type="file" id="screenshotFileInput" multiple accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" hidden>
+            </div>
+            <div class="screenshot-grid" id="screenshotGrid"></div>
+        </section>
+
+        <!-- Section 4: Generate -->
+        <section class="card section-card generate-section" id="sectionGenerate">
+            <div class="generate-content">
+                <div class="generate-summary" id="generateSummary">
+                    <div class="summary-item">
+                        <span class="summary-label">Code Files</span>
+                        <span class="summary-value" id="summaryCodeCount">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Screenshots</span>
+                        <span class="summary-value" id="summaryScreenshotCount">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Status</span>
+                        <span class="summary-value status-badge" id="summaryStatus">Ready</span>
+                    </div>
+                </div>
+                <button class="btn-generate" id="btnGenerate">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span>Generate PDF Report</span>
+                </button>
+                <div class="progress-bar-container" id="progressContainer" style="display: none;">
+                    <div class="progress-bar" id="progressBar"></div>
+                    <span class="progress-text" id="progressText">Generating...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Report Generator &mdash; Built with ♥ for students</p>
+        </footer>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
