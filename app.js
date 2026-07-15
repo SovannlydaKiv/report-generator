@@ -619,17 +619,6 @@ async function generatePDF(isPreview = false) {
         drawLine(institution, styleInst);
         drawLine(department, styleDept);
         drawLine(title, styleTitle);
-        
-        if (projectLink) {
-            doc.setFontSize(styleLink.size);
-            doc.setFont('times', styleLink.bold ? 'bold' : 'normal');
-            doc.setTextColor(60, 120, 255); // Link color
-            const lines = doc.splitTextToSize(projectLink, contentW);
-            doc.textWithLink(lines[0], pageW / 2, currentY, { url: projectLink, align: 'center' });
-            doc.setTextColor(0, 0, 0); // Reset color
-            currentY += lines.length * (styleLink.size * 0.4) + styleLink.space;
-        }
-        
         if (course) drawLine(`Course: ${course}`, styleCourse);
         if (teacher) drawLine(`Lecturer: ${teacher}`, styleLecturer);
         
@@ -788,6 +777,17 @@ async function generatePDF(isPreview = false) {
             }
 
             await sleep(30);
+        }
+
+        // ═══ PROJECT LINK (BOTTOM OF LAST PAGE) ═════════════════
+        if (projectLink) {
+            doc.setFontSize(styleLink.size);
+            doc.setFont('times', styleLink.bold ? 'bold' : 'normal');
+            doc.setTextColor(60, 120, 255); // Link color
+            const lines = doc.splitTextToSize(projectLink, contentW);
+            // Place it near the bottom margin, just above where page numbers go
+            doc.textWithLink(lines[0], pageW / 2, pageH - 15, { url: projectLink, align: 'center' });
+            doc.setTextColor(0, 0, 0);
         }
 
         // ═══ PAGE NUMBERS ═════════════════
