@@ -97,32 +97,100 @@
                     </button>
                 </div>
                 <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" hidden>
+                <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                    <label style="font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="useDefaultLogo" checked style="transform: scale(1.1); cursor: pointer;">
+                        Use default ITC logo if none uploaded
+                    </label>
+                    <div class="style-controls" style="align-self: flex-start;">
+                        <label>Logo Size: <input type="range" id="logoSize" min="20" max="150" value="80" style="width: 100px;"> <span id="logoSizeVal">80</span> max width</label>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="reportTitle">Report Title</label>
-                    <input type="text" id="reportTitle" placeholder="e.g. Data Structures Project Report" autocomplete="off">
+                <div class="form-group full-width">
+                    <div class="label-with-controls">
+                        <label for="institutionName">Institution Name</label>
+                        <div class="style-controls">
+                            <label><input type="checkbox" id="boldInstitution"> Bold</label>
+                            <label>Size: <input type="number" id="sizeInstitution" value="20" min="8" max="72"> pt</label>
+                            <label>Space: <input type="number" id="spaceInstitution" value="15" min="0" max="100"> mm</label>
+                        </div>
+                    </div>
+                    <input type="text" id="institutionName" value="Institute of Technology of Cambodia" autocomplete="off">
                 </div>
-                <div class="form-group">
-                    <label for="studentName">Student Name</label>
-                    <input type="text" id="studentName" placeholder="Your full name" autocomplete="off">
+                <div class="form-group full-width">
+                    <div class="label-with-controls">
+                        <label for="departmentName">Department Name</label>
+                        <div class="style-controls">
+                            <label><input type="checkbox" id="boldDepartment"> Bold</label>
+                            <label>Size: <input type="number" id="sizeDepartment" value="20" min="8" max="72"> pt</label>
+                            <label>Space: <input type="number" id="spaceDepartment" value="25" min="0" max="100"> mm</label>
+                        </div>
+                    </div>
+                    <input type="text" id="departmentName" value="International Program in Software Engineering" autocomplete="off">
                 </div>
-                <div class="form-group">
-                    <label for="studentId">Student ID</label>
-                    <input type="text" id="studentId" placeholder="e.g. 2024-CS-001" autocomplete="off">
+                <div class="form-group full-width">
+                    <div class="label-with-controls">
+                        <label for="reportTitle">Project Title</label>
+                        <div class="style-controls">
+                            <label><input type="checkbox" id="boldTitle" checked> Bold</label>
+                            <label>Size: <input type="number" id="sizeTitle" value="20" min="8" max="72"> pt</label>
+                            <label>Space: <input type="number" id="spaceTitle" value="25" min="0" max="100"> mm</label>
+                        </div>
+                    </div>
+                    <input type="text" id="reportTitle" placeholder="e.g. Mini Project: DCL & Database Load Balancing" autocomplete="off">
                 </div>
-                <div class="form-group">
-                    <label for="className">Class / Course</label>
-                    <input type="text" id="className" placeholder="e.g. Data Structures & Algorithms" autocomplete="off">
+                <div class="form-group full-width">
+                    <div class="label-with-controls">
+                        <label for="className">Course Name</label>
+                        <div class="style-controls">
+                            <label><input type="checkbox" id="boldCourse"> Bold</label>
+                            <label>Size: <input type="number" id="sizeCourse" value="20" min="8" max="72"> pt</label>
+                            <label>Space: <input type="number" id="spaceCourse" value="20" min="0" max="100"> mm</label>
+                        </div>
+                    </div>
+                    <input type="text" id="className" placeholder="e.g. Introduction to DataBase" autocomplete="off">
                 </div>
-                <div class="form-group">
-                    <label for="teacherName">Teacher's Name</label>
-                    <input type="text" id="teacherName" placeholder="e.g. Prof. John Smith" autocomplete="off">
+                <div class="form-group full-width">
+                    <div class="label-with-controls">
+                        <label for="teacherName">Lecturer's Name</label>
+                        <div class="style-controls">
+                            <label><input type="checkbox" id="boldLecturer"> Bold</label>
+                            <label>Size: <input type="number" id="sizeLecturer" value="20" min="8" max="72"> pt</label>
+                            <label>Space: <input type="number" id="spaceLecturer" value="25" min="0" max="100"> mm</label>
+                        </div>
+                    </div>
+                    <input type="text" id="teacherName" placeholder="e.g. Mr. NOP PHEARUM" autocomplete="off">
                 </div>
-                <div class="form-group">
-                    <label for="reportDate">Date</label>
-                    <input type="date" id="reportDate">
+                <div class="form-group full-width">
+                    <div class="label-with-controls">
+                        <label for="projectLink">Project Link (e.g. GitHub)</label>
+                        <div class="style-controls">
+                            <label><input type="checkbox" id="boldLink"> Bold</label>
+                            <label>Size: <input type="number" id="sizeLink" value="16" min="8" max="72"> pt</label>
+                            <label>Space: <input type="number" id="spaceLink" value="20" min="0" max="100"> mm</label>
+                        </div>
+                    </div>
+                    <input type="url" id="projectLink" placeholder="e.g. https://github.com/username/project" autocomplete="off">
+                </div>
+                <div class="form-group full-width" style="margin-top: 10px;">
+                    <div class="label-with-controls">
+                        <label>Student Name</label>
+                        <div class="style-controls">
+                            <label><input type="checkbox" id="boldMembersHeading" checked> Bold</label>
+                            <label>Size: <input type="number" id="sizeMembersHeading" value="20" min="8" max="72"> pt</label>
+                            <label>Space: <input type="number" id="spaceMembersHeading" value="15" min="0" max="100"> mm</label>
+                        </div>
+                    </div>
+                    <div id="membersList">
+                        <div class="member-row">
+                            <input type="text" class="member-name" placeholder="Name (e.g. Chiv Inthera)" autocomplete="off">
+                            <input type="text" class="member-id" placeholder="ID (e.g. p20240019)" autocomplete="off">
+                            <button class="remove-member-btn" style="display: none;" onclick="removeMemberRow(this)">✕</button>
+                        </div>
+                    </div>
+                    <button class="add-member-btn" id="btnAddMember" type="button" style="margin-top: 8px;">+ Add Student</button>
                 </div>
             </div>
         </section>
@@ -141,15 +209,15 @@
             <p class="section-hint">Upload source code files, then add output screenshots for each one.</p>
             <div class="drop-zone" id="codeDropZone">
                 <div class="drop-zone-content">
-                    <div class="drop-icon">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="17 8 12 3 7 8"/>
-                            <line x1="12" y1="3" x2="12" y2="15"/>
-                        </svg>
+                    <svg class="drop-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <div style="text-align: left;">
+                        <p style="font-weight: 600; font-size: 0.95rem;">Drag & drop your source code files here</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted)">or click to browse — supports .c, .cpp, .py, .java, .js, .html, .css, .h, .hpp, .txt and more</p>
                     </div>
-                    <p class="drop-text">Drag & drop your source code files here</p>
-                    <p class="drop-subtext">or click to browse — supports .c, .cpp, .py, .java, .js, .html, .css, .h, .hpp, .txt and more</p>
                 </div>
                 <input type="file" id="codeFileInput" multiple accept=".c,.cpp,.h,.hpp,.py,.java,.js,.ts,.html,.css,.txt,.cs,.rb,.go,.rs,.php,.swift,.kt,.scala,.r,.m,.sql,.sh,.bat,.ps1,.yaml,.yml,.json,.xml,.md" hidden>
             </div>
@@ -173,14 +241,23 @@
                         <span class="summary-value status-badge" id="summaryStatus">Ready</span>
                     </div>
                 </div>
-                <button class="btn-generate" id="btnGenerate">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7 10 12 15 17 10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                    <span>Generate PDF Report</span>
-                </button>
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button class="btn-generate" id="btnPreview" style="background: rgba(99, 143, 255, 0.1); color: var(--accent-primary); box-shadow: none;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <span>Preview PDF</span>
+                    </button>
+                    <button class="btn-generate" id="btnGenerate">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        <span>Generate PDF Report</span>
+                    </button>
+                </div>
                 <div class="progress-bar-container" id="progressContainer" style="display: none;">
                     <div class="progress-bar" id="progressBar"></div>
                     <span class="progress-text" id="progressText">Generating...</span>
@@ -197,6 +274,7 @@
     <!-- Toast notification -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <script src="logo.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

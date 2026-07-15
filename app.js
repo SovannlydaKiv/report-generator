@@ -15,12 +15,22 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 const els = {
+    institutionName: $('#institutionName'),
+    departmentName: $('#departmentName'),
     reportTitle:  $('#reportTitle'),
-    studentName:  $('#studentName'),
-    studentId:    $('#studentId'),
+    projectLink:  $('#projectLink'),
     className:    $('#className'),
     teacherName:  $('#teacherName'),
-    reportDate:   $('#reportDate'),
+
+    boldInstitution: $('#boldInstitution'),
+    boldDepartment: $('#boldDepartment'),
+    boldTitle: $('#boldTitle'),
+    boldCourse: $('#boldCourse'),
+    boldLecturer: $('#boldLecturer'),
+    boldMembersHeading: $('#boldMembersHeading'),
+
+    membersList: $('#membersList'),
+    btnAddMember: $('#btnAddMember'),
 
     logoUploadZone:  $('#logoUploadZone'),
     logoFileInput:   $('#logoFileInput'),
@@ -33,6 +43,7 @@ const els = {
     exerciseList:    $('#exerciseList'),
 
     btnGenerate:         $('#btnGenerate'),
+    btnPreview:          $('#btnPreview'),
     summaryExerciseCount:    $('#summaryExerciseCount'),
     summaryScreenshotCount:  $('#summaryScreenshotCount'),
     summaryStatus:       $('#summaryStatus'),
@@ -46,9 +57,6 @@ const els = {
 
 // ─── Init ───────────────────────────────
 function init() {
-    els.reportDate.value = new Date().toISOString().split('T')[0];
-
-    // Logo upload
     els.logoUploadZone.addEventListener('click', (e) => {
         if (e.target.closest('.logo-remove-btn')) return;
         els.logoFileInput.click();
@@ -62,18 +70,37 @@ function init() {
         removeLogo();
     });
 
-    // Code file upload
     setupDropZone(els.codeDropZone, els.codeFileInput, handleCodeFiles);
 
-    // Generate button
-    els.btnGenerate.addEventListener('click', generatePDF);
+    els.btnGenerate.addEventListener('click', () => generatePDF(false));
+    els.btnPreview.addEventListener('click', () => generatePDF(true));
+    els.btnAddMember.addEventListener('click', addMemberRow);
 
-    // Form listeners
-    [els.reportTitle, els.studentName, els.studentId, els.className, els.teacherName, els.reportDate]
+    $('#useDefaultLogo').addEventListener('change', (e) => {
+        if (e.target.checked) {
+            if (!state.logo) loadDefaultLogo();
+        } else {
+            if (state.logo && state.logo.name === 'ITC_logo.png') {
+                removeLogo();
+            }
+        }
+    });
+
+    $('#sectionDetails').addEventListener('input', saveSettings);
+    $('#sectionDetails').addEventListener('change', saveSettings);
+    
+    $('#logoSize').addEventListener('input', (e) => {
+        $('#logoSizeVal').textContent = e.target.value;
+    });
+
+    [els.institutionName, els.departmentName, els.reportTitle, els.projectLink, els.className, els.teacherName]
         .forEach(input => input.addEventListener('input', updateSteps));
+    els.membersList.addEventListener('input', updateSteps);
 
+    loadSettings();
     updateSummary();
     updateSteps();
+    if ($('#useDefaultLogo').checked && !state.logo) loadDefaultLogo();
 }
 
 // ─── Logo Handling ──────────────────────
@@ -85,6 +112,7 @@ function handleLogoUpload(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
         state.logo = { name: file.name, dataUrl: e.target.result };
+        $('#useDefaultLogo').checked = false;
         els.logoUploadContent.style.display = 'none';
         els.logoPreview.src = e.target.result;
         els.logoPreview.style.display = 'block';
@@ -99,7 +127,9 @@ function removeLogo() {
     els.logoUploadContent.style.display = 'flex';
     els.logoPreview.style.display = 'none';
     els.logoRemoveBtn.style.display = 'none';
-    showToast('Logo removed', 'info');
+    if ($('#useDefaultLogo').checked) {
+        loadDefaultLogo();
+    }
 }
 
 // ─── Drop Zone Setup ────────────────────
@@ -133,23 +163,27 @@ function setupDropZone(dropZone, fileInput, handler) {
 
 // ─── Code File Handling ─────────────────
 function handleCodeFiles(files) {
-    files.forEach(file => {
-        const ext = file.name.split('.').pop().toLowerCase();
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            state.exercises.push({
+    const ext = file => file.name.split('.').pop().toLowerCase();
+    Promise.all(files.map(file => {
+        return new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve({
                 name: file.name,
                 content: e.target.result,
-                extension: ext,
+                extension: ext(file),
                 size: file.size,
                 screenshots: [],
             });
-            renderExercises();
-            updateSummary();
-            updateSteps();
-            showToast(`Added ${file.name}`, 'success');
-        };
-        reader.readAsText(file);
+            reader.readAsText(file);
+        });
+    })).then(newExercises => {
+        newExercises.forEach(ex => {
+            state.exercises.push(ex);
+            showToast(`Added ${ex.name}`, 'success');
+        });
+        renderExercises();
+        updateSummary();
+        updateSteps();
     });
 }
 
@@ -239,19 +273,23 @@ function handleExerciseScreenshots(idx, input) {
 }
 
 function addScreenshotsToExercise(idx, files) {
-    files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            state.exercises[idx].screenshots.push({
+    Promise.all(files.map(file => {
+        return new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve({
                 name: file.name,
                 dataUrl: e.target.result,
             });
-            renderExercises();
-            updateSummary();
-            updateSteps();
+            reader.readAsDataURL(file);
+        });
+    })).then(newScreenshots => {
+        newScreenshots.forEach(ss => {
+            state.exercises[idx].screenshots.push(ss);
             showToast(`Added screenshot to ${state.exercises[idx].name}`, 'success');
-        };
-        reader.readAsDataURL(file);
+        });
+        renderExercises();
+        updateSummary();
+        updateSteps();
     });
 }
 
@@ -283,7 +321,7 @@ function updateSteps() {
     const steps = Array.from(els.steps);
     const lines = Array.from(els.stepLines);
 
-    const detailsFilled = els.studentName.value.trim() && els.studentId.value.trim() && els.className.value.trim();
+    const detailsFilled = Array.from(els.membersList.querySelectorAll('.member-name')).some(i => i.value.trim()) && els.reportTitle.value.trim();
     const hasExercises = state.exercises.length > 0;
 
     steps.forEach(s => s.classList.remove('active', 'completed'));
@@ -498,20 +536,42 @@ function renderTokenizedLine(doc, tokens, x, y, fontSize) {
 }
 
 // ─── PDF Generation ─────────────────────
-async function generatePDF() {
-    const title = els.reportTitle.value.trim() || 'Project Report';
-    const name = els.studentName.value.trim();
-    const id = els.studentId.value.trim();
-    const cls = els.className.value.trim();
+async function generatePDF(isPreview = false) {
+    const institution = els.institutionName.value.trim();
+    const department = els.departmentName.value.trim();
+    const title = els.reportTitle.value.trim();
+    const projectLink = els.projectLink.value.trim();
+    const course = els.className.value.trim();
     const teacher = els.teacherName.value.trim();
-    const date = els.reportDate.value;
 
-    if (!name) { showToast('Please enter your name', 'error'); els.studentName.focus(); return; }
-    if (!id) { showToast('Please enter your student ID', 'error'); els.studentId.focus(); return; }
-    if (!cls) { showToast('Please enter your class/course', 'error'); els.className.focus(); return; }
+    const getStyle = (idBase) => ({
+        bold: $('#bold' + idBase).checked,
+        size: parseInt($('#size' + idBase).value) || 20,
+        space: parseInt($('#space' + idBase).value) || 15
+    });
+
+    const styleInst = getStyle('Institution');
+    const styleDept = getStyle('Department');
+    const styleTitle = getStyle('Title');
+    const styleLink = getStyle('Link');
+    const styleCourse = getStyle('Course');
+    const styleLecturer = getStyle('Lecturer');
+    const styleMembers = getStyle('MembersHeading');
+    const logoSize = parseInt($('#logoSize').value) || 80;
+
+    const members = Array.from(els.membersList.querySelectorAll('.member-row'))
+        .map(row => ({
+            name: row.querySelector('.member-name').value.trim(),
+            id: row.querySelector('.member-id').value.trim()
+        }))
+        .filter(m => m.name || m.id);
+
+    if (!title) { showToast('Please enter a project title', 'error'); els.reportTitle.focus(); return; }
+    if (members.length === 0) { showToast('Please add at least one group member', 'error'); return; }
     if (state.exercises.length === 0) { showToast('Please add at least one exercise', 'error'); return; }
 
     els.btnGenerate.disabled = true;
+    els.btnPreview.disabled = true;
     els.progressContainer.style.display = 'block';
     setProgress(5, 'Initializing...');
 
@@ -527,60 +587,67 @@ async function generatePDF() {
         // ═══ COVER PAGE ═══════════════════
         setProgress(10, 'Creating cover page...');
 
-        // School logo
-        let logoEndY = pageH * 0.18;
+        let currentY = 25;
+
+        // Logo
         if (state.logo) {
             try {
                 const logoDims = await getImageDimensions(state.logo.dataUrl);
                 const logoAspect = logoDims.width / logoDims.height;
-                let logoH = 28;
+                let logoH = logoSize * 0.55; 
                 let logoW = logoH * logoAspect;
-                if (logoW > 60) { logoW = 60; logoH = logoW / logoAspect; }
+                if (logoW > logoSize) { logoW = logoSize; logoH = logoW / logoAspect; }
                 const logoX = (pageW - logoW) / 2;
-                const logoY = 25;
-                doc.addImage(state.logo.dataUrl, 'PNG', logoX, logoY, logoW, logoH);
-                logoEndY = logoY + logoH + 15;
+                doc.addImage(state.logo.dataUrl, 'PNG', logoX, currentY, logoW, logoH);
+                currentY += logoH + 20;
             } catch (e) {
                 console.warn('Could not embed logo:', e);
             }
+        } else {
+            currentY += 40; // Spacing if no logo
         }
 
-        // Title
-        doc.setFont('times', 'bold');
-        doc.setFontSize(26);
-        doc.setTextColor(0, 0, 0);
-        const titleLines = doc.splitTextToSize(title, contentW);
-        let titleY = Math.max(logoEndY + 20, pageH * 0.30);
-        doc.text(titleLines, pageW / 2, titleY, { align: 'center' });
-        titleY += titleLines.length * 11;
+        const drawLine = (text, style) => {
+            if (!text) return;
+            doc.setFontSize(style.size);
+            doc.setFont('times', style.bold ? 'bold' : 'normal');
+            const lines = doc.splitTextToSize(text, contentW);
+            doc.text(lines, pageW / 2, currentY, { align: 'center' });
+            currentY += lines.length * (style.size * 0.4) + style.space;
+        };
 
-        // Rule
-        doc.setDrawColor(0, 0, 0);
-        doc.setLineWidth(0.4);
-        doc.line(pageW / 2 - 40, titleY + 6, pageW / 2 + 40, titleY + 6);
-
-        // Course
-        doc.setFont('times', 'normal');
-        doc.setFontSize(14);
-        doc.setTextColor(60, 60, 60);
-        doc.text(cls, pageW / 2, titleY + 20, { align: 'center' });
-
-        // Info block
-        const infoStartY = titleY + 46;
-        const infoPairs = [['Student Name', name], ['Student ID', id]];
-        if (teacher) infoPairs.push(['Instructor', teacher]);
-        if (date) infoPairs.push(['Date', formatDate(date)]);
-
-        doc.setFontSize(12);
-        infoPairs.forEach(([label, value], i) => {
-            const y = infoStartY + i * 10;
-            doc.setFont('times', 'bold');
-            doc.setTextColor(0, 0, 0);
-            doc.text(`${label}:`, pageW / 2 - 5, y, { align: 'right' });
+        drawLine(institution, styleInst);
+        drawLine(department, styleDept);
+        drawLine(title, styleTitle);
+        
+        if (projectLink) {
+            doc.setFontSize(styleLink.size);
+            doc.setFont('times', styleLink.bold ? 'bold' : 'normal');
+            doc.setTextColor(60, 120, 255); // Link color
+            const lines = doc.splitTextToSize(projectLink, contentW);
+            doc.textWithLink(lines[0], pageW / 2, currentY, { url: projectLink, align: 'center' });
+            doc.setTextColor(0, 0, 0); // Reset color
+            currentY += lines.length * (styleLink.size * 0.4) + styleLink.space;
+        }
+        
+        if (course) drawLine(`Course: ${course}`, styleCourse);
+        if (teacher) drawLine(`Lecturer: ${teacher}`, styleLecturer);
+        
+        if (members.length > 0) {
+            doc.setFontSize(styleMembers.size);
+            doc.setFont('times', styleMembers.bold ? 'bold' : 'normal');
+            doc.text('Student Name', pageW / 2, currentY, { align: 'center' });
+            currentY += styleMembers.space;
+            
+            doc.setFontSize(styleMembers.size * 0.85);
             doc.setFont('times', 'normal');
-            doc.setTextColor(33, 33, 33);
-            doc.text(`  ${value}`, pageW / 2 - 5, y);
-        });
+            members.forEach(m => {
+                let text = m.name;
+                if (m.id) text += ` | ID: ${m.id}`;
+                doc.text(text, pageW / 2, currentY, { align: 'center' });
+                currentY += styleMembers.size * 0.5;
+            });
+        }
 
         // ═══ EXERCISES ═══════════════════
         for (let exIdx = 0; exIdx < state.exercises.length; exIdx++) {
@@ -613,7 +680,6 @@ async function generatePDF() {
 
             for (let ln = 0; ln < codeLines.length; ln++) {
                 if (y + lineHeight > pageH - margin - 8) {
-                    addPageNumber(doc, pageW, pageH);
                     doc.addPage();
                     y = margin;
 
@@ -649,8 +715,6 @@ async function generatePDF() {
                 y += lineHeight;
             }
 
-            addPageNumber(doc, pageW, pageH);
-
             // ── Output screenshots for this exercise ──
             if (ex.screenshots.length > 0) {
                 // Add space or new page
@@ -658,7 +722,6 @@ async function generatePDF() {
 
                 // "Output" heading
                 if (y + 30 > pageH - margin) {
-                    addPageNumber(doc, pageW, pageH);
                     doc.addPage();
                     y = margin;
                 }
@@ -690,7 +753,6 @@ async function generatePDF() {
 
                     const neededH = imgH + 22;
                     if (y + neededH > pageH - margin) {
-                        addPageNumber(doc, pageW, pageH);
                         doc.addPage();
                         y = margin;
                     }
@@ -723,25 +785,38 @@ async function generatePDF() {
 
                     await sleep(20);
                 }
-                addPageNumber(doc, pageW, pageH);
             }
 
             await sleep(30);
         }
 
-        // ═══ SAVE ═════════════════════════
+        // ═══ PAGE NUMBERS ═════════════════
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(170, 170, 170);
+            doc.text(`Page ${i}`, pageW / 2, pageH - 8, { align: 'center' });
+        }
+
+        // ═══ SAVE / PREVIEW ══════════════
         setProgress(95, 'Finalizing PDF...');
         await sleep(200);
 
-        const fileName = `${title.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_')}_${id}.pdf`;
-        doc.save(fileName);
-
-        setProgress(100, 'Done!');
-        showToast('PDF generated successfully! 🎉', 'success');
+        if (isPreview) {
+            window.open(doc.output('bloburl'), '_blank');
+            showToast('Preview generated successfully!', 'success');
+        } else {
+            const fileName = `${title.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_')}_Report.pdf`;
+            doc.save(fileName);
+            showToast('PDF generated successfully! 🎉', 'success');
+        }
 
         setTimeout(() => {
             els.progressContainer.style.display = 'none';
             els.btnGenerate.disabled = false;
+            els.btnPreview.disabled = false;
             setProgress(0, '');
         }, 2000);
 
@@ -750,17 +825,11 @@ async function generatePDF() {
         showToast(`Error: ${err.message}`, 'error');
         els.progressContainer.style.display = 'none';
         els.btnGenerate.disabled = false;
+        els.btnPreview.disabled = false;
     }
 }
 
 // ─── PDF Helpers ────────────────────────
-function addPageNumber(doc, pageW, pageH) {
-    const pageCount = doc.internal.getNumberOfPages();
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(170, 170, 170);
-    doc.text(`Page ${pageCount}`, pageW / 2, pageH - 8, { align: 'center' });
-}
 
 function getImageDimensions(dataUrl) {
     return new Promise((resolve) => {
@@ -835,6 +904,126 @@ function showToast(message, type = 'info') {
         toast.classList.add('toast-exit');
         setTimeout(() => toast.remove(), 300);
     }, 3500);
+}
+
+// ─── Cover Page Utilities ───────────────
+function addMemberRow() {
+    const row = document.createElement('div');
+    row.className = 'member-row';
+    row.innerHTML = `
+        <input type="text" class="member-name" placeholder="Name (e.g. Chiv Inthera)" autocomplete="off">
+        <input type="text" class="member-id" placeholder="ID (e.g. p20240019)" autocomplete="off">
+        <button class="remove-member-btn" onclick="removeMemberRow(this)">✕</button>
+    `;
+    els.membersList.appendChild(row);
+    
+    const rows = els.membersList.querySelectorAll('.member-row');
+    rows.forEach(r => r.querySelector('.remove-member-btn').style.display = rows.length > 1 ? 'block' : 'none');
+    
+    row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateSteps));
+    updateSteps();
+}
+
+window.removeMemberRow = function(btn) {
+    const row = btn.closest('.member-row');
+    row.remove();
+    const rows = els.membersList.querySelectorAll('.member-row');
+    rows.forEach(r => r.querySelector('.remove-member-btn').style.display = rows.length > 1 ? 'block' : 'none');
+    updateSteps();
+};
+
+function loadDefaultLogo() {
+    if (typeof DEFAULT_LOGO_B64 !== 'undefined' && $('#useDefaultLogo').checked && !state.logo) {
+        state.logo = { name: 'ITC_logo.png', dataUrl: DEFAULT_LOGO_B64 };
+        els.logoUploadContent.style.display = 'none';
+        els.logoPreview.src = DEFAULT_LOGO_B64;
+        els.logoPreview.style.display = 'block';
+        els.logoRemoveBtn.style.display = 'flex';
+    }
+}
+
+function saveSettings() {
+    const data = {
+        logoSize: $('#logoSize').value,
+        useDefaultLogo: $('#useDefaultLogo').checked,
+        fields: {
+            institutionName: $('#institutionName').value,
+            departmentName: $('#departmentName').value,
+            reportTitle: $('#reportTitle').value,
+            projectLink: $('#projectLink').value,
+            className: $('#className').value,
+            teacherName: $('#teacherName').value,
+        },
+        styles: {
+            Institution: { bold: $('#boldInstitution').checked, size: $('#sizeInstitution').value, space: $('#spaceInstitution').value },
+            Department: { bold: $('#boldDepartment').checked, size: $('#sizeDepartment').value, space: $('#spaceDepartment').value },
+            Title: { bold: $('#boldTitle').checked, size: $('#sizeTitle').value, space: $('#spaceTitle').value },
+            Link: { bold: $('#boldLink').checked, size: $('#sizeLink').value, space: $('#spaceLink').value },
+            Course: { bold: $('#boldCourse').checked, size: $('#sizeCourse').value, space: $('#spaceCourse').value },
+            Lecturer: { bold: $('#boldLecturer').checked, size: $('#sizeLecturer').value, space: $('#spaceLecturer').value },
+            MembersHeading: { bold: $('#boldMembersHeading').checked, size: $('#sizeMembersHeading').value, space: $('#spaceMembersHeading').value },
+        },
+        members: Array.from(els.membersList.querySelectorAll('.member-row')).map(row => ({
+            name: row.querySelector('.member-name').value,
+            id: row.querySelector('.member-id').value
+        }))
+    };
+    localStorage.setItem('reportSettings', JSON.stringify(data));
+}
+
+function loadSettings() {
+    try {
+        const json = localStorage.getItem('reportSettings');
+        if (!json) return;
+        const data = JSON.parse(json);
+
+        if (data.logoSize) {
+            $('#logoSize').value = data.logoSize;
+            $('#logoSizeVal').textContent = data.logoSize;
+        }
+        if (data.useDefaultLogo !== undefined) {
+            $('#useDefaultLogo').checked = data.useDefaultLogo;
+        }
+
+        if (data.fields) {
+            $('#institutionName').value = data.fields.institutionName !== undefined ? data.fields.institutionName : 'Institute of Technology of Cambodia';
+            $('#departmentName').value = data.fields.departmentName !== undefined ? data.fields.departmentName : 'International Program in Software Engineering';
+            $('#reportTitle').value = data.fields.reportTitle || '';
+            $('#projectLink').value = data.fields.projectLink || '';
+            $('#className').value = data.fields.className || '';
+            $('#teacherName').value = data.fields.teacherName || '';
+        }
+
+        if (data.styles) {
+            Object.entries(data.styles).forEach(([base, style]) => {
+                const bold = $('#bold' + base);
+                const size = $('#size' + base);
+                const space = $('#space' + base);
+                if (bold && style.bold !== undefined) bold.checked = style.bold;
+                if (size && style.size !== undefined) size.value = style.size;
+                if (space && style.space !== undefined) space.value = style.space;
+            });
+        }
+
+        if (data.members && data.members.length > 0) {
+            els.membersList.innerHTML = '';
+            data.members.forEach(m => {
+                const row = document.createElement('div');
+                row.className = 'member-row';
+                row.innerHTML = `
+                    <input type="text" class="member-name" placeholder="Name (e.g. Chiv Inthera)" autocomplete="off" value="${escapeHtml(m.name)}">
+                    <input type="text" class="member-id" placeholder="ID (e.g. p20240019)" autocomplete="off" value="${escapeHtml(m.id)}">
+                    <button class="remove-member-btn" onclick="removeMemberRow(this)">✕</button>
+                `;
+                els.membersList.appendChild(row);
+            });
+            const rows = els.membersList.querySelectorAll('.member-row');
+            rows.forEach(r => r.querySelector('.remove-member-btn').style.display = rows.length > 1 ? 'block' : 'none');
+        }
+
+    } catch (e) {
+        console.warn("Could not load settings from localStorage", e);
+    }
 }
 
 // ─── Start ──────────────────────────────

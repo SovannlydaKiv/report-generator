@@ -295,8 +295,8 @@ body {
 }
 
 .logo-upload-zone {
-    width: 140px;
-    height: 140px;
+    width: 100px;
+    height: 100px;
     border: 2px dashed var(--border-color);
     border-radius: var(--radius-md);
     cursor: pointer;
@@ -407,7 +407,7 @@ body {
 .drop-zone {
     border: 2px dashed var(--border-color);
     border-radius: var(--radius-md);
-    padding: var(--space-2xl) var(--space-lg);
+    padding: var(--space-lg);
     text-align: center;
     cursor: pointer;
     transition: var(--transition-normal);
@@ -433,13 +433,16 @@ body {
 .drop-zone.drag-over::before { opacity: 0.05; }
 
 .drop-zone-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
     position: relative;
     z-index: 1;
 }
 
 .drop-icon {
     color: var(--text-muted);
-    margin-bottom: var(--space-md);
     transition: var(--transition-normal);
 }
 
@@ -564,7 +567,7 @@ body {
 .mini-drop-zone {
     border: 1.5px dashed var(--border-color);
     border-radius: var(--radius-sm);
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     text-align: center;
     cursor: pointer;
     transition: var(--transition-normal);
@@ -817,6 +820,85 @@ body {
 }
 
 .toast-exit { animation: slideOutRight 0.3s ease-in forwards; }
+
+/* --- Cover Page Elements --- */
+.full-width { grid-column: 1 / -1; }
+.form-group label input[type="checkbox"] { margin-left: 8px; transform: scale(1.1); cursor: pointer; }
+.member-row { display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+.member-row input { flex: 1; }
+.add-member-btn {
+    background: transparent;
+    border: 1px dashed var(--border-color);
+    color: var(--accent-primary);
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: var(--transition-fast);
+}
+.add-member-btn:hover { background: rgba(99, 143, 255, 0.1); }
+.remove-member-btn {
+    background: rgba(248, 113, 113, 0.1);
+    color: var(--danger);
+    border: none;
+    border-radius: var(--radius-sm);
+    width: 36px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: var(--transition-fast);
+}
+.remove-member-btn:hover { background: var(--danger); color: white; }
+
+.label-with-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: var(--space-xs);
+}
+
+.label-with-controls label {
+    margin-bottom: 0;
+}
+
+.style-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: var(--bg-tertiary);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.style-controls label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: normal;
+    font-size: 0.8rem;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.style-controls input[type="number"] {
+    width: 45px;
+    padding: 2px 4px;
+    font-size: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.style-controls input[type="checkbox"] {
+    margin: 0;
+    transform: scale(1.1);
+    cursor: pointer;
+}
 
 /* --- Footer --- */
 .footer {
